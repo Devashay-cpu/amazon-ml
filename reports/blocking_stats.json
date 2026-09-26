@@ -1,0 +1,295 @@
+{
+  "run": {
+    "dataset": "train",
+    "entities_evaluated": 20000,
+    "sample_mode": "first 20000",
+    "s2_index_build_seconds": 2273.35,
+    "s3_index_build_seconds": 3631.43,
+    "candidate_generation_seconds": 144.39,
+    "peak_memory_mb": 7905.5
+  },
+  "candidate_count_stats": {
+    "total": {
+      "mean": 11068.76,
+      "median": 5291.0,
+      "p90": 22589,
+      "p95": 48720,
+      "p99": 96671,
+      "max": 141040,
+      "min": 0
+    },
+    "s2_only": {
+      "mean": 5607.25,
+      "median": 2404.0,
+      "p90": 10995,
+      "p95": 27067,
+      "p99": 53826,
+      "max": 83590,
+      "min": 0
+    },
+    "s3_only": {
+      "mean": 5461.51,
+      "median": 2613.0,
+      "p90": 11482,
+      "p95": 22808,
+      "p99": 43196,
+      "max": 64948,
+      "min": 0
+    }
+  },
+  "blocking_recall": {
+    "overall": 0.9131,
+    "s2": 0.9105,
+    "s3": 0.9155,
+    "only_s2_entities": 0.9131,
+    "only_s3_entities": 0.9163,
+    "both_s2_s3_entities": 0.913
+  },
+  "raw_pair_counts": {
+    "gt_pairs_s2": 33425,
+    "found_pairs_s2": 30435,
+    "gt_pairs_s3": 36053,
+    "found_pairs_s3": 33007,
+    "group_gt_pairs": {
+      "only_s2": 2634,
+      "only_s3": 3131,
+      "both": 63713
+    },
+    "group_found_pairs": {
+      "only_s2": 2405,
+      "only_s3": 2869,
+      "both": 58168
+    }
+  },
+  "strategy_pairs_found": {
+    "country_exact_name": 15181,
+    "country_name_prefix4": 52951,
+    "country_suffix_stripped_name": 27527,
+    "house_number_street": 23601,
+    "address_alnum_prefix8": 30744,
+    "country_rare_name_token": 12211,
+    "postal_code": 12282
+  },
+  "s2_problematic_blocks": [
+    [
+      "postal_code",
+      "india|2nd",
+      53269
+    ],
+    [
+      "postal_code",
+      "india|1st",
+      48528
+    ],
+    [
+      "country_name_prefix4",
+      "india|priv",
+      41490
+    ],
+    [
+      "postal_code",
+      "india|3rd",
+      37174
+    ],
+    [
+      "country_name_prefix4",
+      "united states|pedi",
+      30732
+    ],
+    [
+      "country_name_prefix4",
+      "united states|inte",
+      27624
+    ],
+    [
+      "country_name_prefix4",
+      "india|shri",
+      26764
+    ],
+    [
+      "address_alnum_prefix8",
+      "india|maharash",
+      26367
+    ],
+    [
+      "postal_code",
+      "india|4th",
+      23315
+    ],
+    [
+      "address_alnum_prefix8",
+      "india|officeno",
+      16508
+    ],
+    [
+      "country_name_prefix4",
+      "united states|prim",
+      15518
+    ],
+    [
+      "country_name_prefix4",
+      "india|limi",
+      15393
+    ],
+    [
+      "country_name_prefix4",
+      "united states|metr",
+      15271
+    ],
+    [
+      "postal_code",
+      "india|5th",
+      14830
+    ],
+    [
+      "country_name_prefix4",
+      "india|indi",
+      14035
+    ],
+    [
+      "country_name_prefix4",
+      "united states|fami",
+      13736
+    ],
+    [
+      "country_name_prefix4",
+      "united states|card",
+      12399
+    ],
+    [
+      "country_name_prefix4",
+      "united states|brig",
+      12286
+    ],
+    [
+      "country_name_prefix4",
+      "india|tech",
+      11251
+    ],
+    [
+      "country_name_prefix4",
+      "united states|dent",
+      11115
+    ]
+  ],
+  "s3_problematic_blocks": [
+    [
+      "country_name_prefix4",
+      "india|priv",
+      49720
+    ],
+    [
+      "postal_code",
+      "india|2nd",
+      41930
+    ],
+    [
+      "postal_code",
+      "india|1st",
+      38491
+    ],
+    [
+      "country_name_prefix4",
+      "united states|pedi",
+      31261
+    ],
+    [
+      "country_name_prefix4",
+      "india|shri",
+      30313
+    ],
+    [
+      "postal_code",
+      "india|3rd",
+      28862
+    ],
+    [
+      "country_name_prefix4",
+      "united states|inte",
+      28252
+    ],
+    [
+      "country_name_prefix4",
+      "india|limi",
+      19771
+    ],
+    [
+      "postal_code",
+      "india|4th",
+      18271
+    ],
+    [
+      "address_alnum_prefix8",
+      "india|officeno",
+      16220
+    ],
+    [
+      "country_name_prefix4",
+      "united states|prim",
+      15866
+    ],
+    [
+      "country_name_prefix4",
+      "india|indi",
+      15843
+    ],
+    [
+      "country_name_prefix4",
+      "united states|metr",
+      15206
+    ],
+    [
+      "country_name_prefix4",
+      "india|shiv",
+      14190
+    ],
+    [
+      "country_name_prefix4",
+      "united states|fami",
+      13720
+    ],
+    [
+      "country_name_prefix4",
+      "india|tech",
+      13519
+    ],
+    [
+      "address_alnum_prefix8",
+      "united states|northcar",
+      13232
+    ],
+    [
+      "country_name_prefix4",
+      "united states|card",
+      12416
+    ],
+    [
+      "country_name_prefix4",
+      "united states|brig",
+      12391
+    ],
+    [
+      "country_name_prefix4",
+      "india|shre",
+      11988
+    ]
+  ],
+  "s2_strategy_key_counts": {
+    "country_exact_name": 3834140,
+    "country_name_prefix4": 196352,
+    "country_suffix_stripped_name": 3306176,
+    "country_rare_name_token": 802913,
+    "postal_code": 85791,
+    "house_number_street": 1640321,
+    "address_alnum_prefix8": 2613705
+  },
+  "s3_strategy_key_counts": {
+    "country_exact_name": 4146518,
+    "country_name_prefix4": 200613,
+    "country_suffix_stripped_name": 3612076,
+    "country_rare_name_token": 859626,
+    "postal_code": 89966,
+    "house_number_street": 1678799,
+    "address_alnum_prefix8": 2635231
+  }
+}
