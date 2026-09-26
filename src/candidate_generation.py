@@ -13,7 +13,7 @@ accumulate statistics without holding every candidate set in memory.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Iterator, Optional, Set, Tuple
+from typing import Any, Dict, Iterator, Optional, Set, Tuple
 
 import pandas as pd
 
@@ -50,6 +50,57 @@ def build_index_from_source(file_path: Path, label: str) -> BlockIndex:
             idx.add_pass2(str(row_d.get("entity_id")), norm_name, norm_addr, norm_country)
 
     return idx
+
+
+def build_record_lookup(file_path: Path) -> Dict[str, Dict[str, Any]]:
+    """
+    Phase 3 addition (additive only — does not change build_index_from_source
+    or iter_candidates above). Streams a source file once and returns
+    {entity_id: {"name": <normalize_business_name output>,
+                 "address": <normalize_address output>,
+                 "country": <normalize_country output>}}
+    so pair-level feature extraction can look up a candidate's normalized
+    fields by ID after blocking has already selected which IDs matter.
+
+    This holds one normalized record per row in memory — necessary because
+    feature extraction needs random access by ID, unlike index building
+    (which only needs streaming access). For the full ~2.2M-row sources this
+    is the memory-heavy step of Phase 3; see docs/PHASE3_DESIGN.md for the
+    scaling note (e.g. restricting this to only IDs that actually appear in
+    at least one candidate set, rather than all of S2/S3).
+    """
+    lookup: Dict[str, Dict[str, Any]] = {}
+    for chunk in pd.read_csv(file_path, sep="\t", dtype=str, chunksize=CHUNK_SIZE):
+        for row in chunk.itertuples(index=False):
+            row_d = row._asdict()
+            entity_id = str(row_d.get("entity_id"))
+            lookup[entity_id] = {
+                "name": normalize_business_name(row_d.get("business_name")),
+                "address": normalize_address(row_d.get("business_address")),
+                "country": normalize_country(row_d.get("country")),
+            }
+    return lookup
+
+
+def build_record_lookup_for_ids(file_path: Path, ids_needed: Set[str]) -> Dict[str, Dict[str, Any]]:
+    """
+    Same as build_record_lookup, but only retains records whose entity_id is
+    in `ids_needed` — the memory-saving variant recommended in
+    docs/PHASE3_DESIGN.md once you know which candidate IDs actually matter
+    (e.g. the union of all candidate sets a blocking run produced).
+    """
+    lookup: Dict[str, Dict[str, Any]] = {}
+    for chunk in pd.read_csv(file_path, sep="\t", dtype=str, chunksize=CHUNK_SIZE):
+        for row in chunk.itertuples(index=False):
+            row_d = row._asdict()
+            entity_id = str(row_d.get("entity_id"))
+            if entity_id in ids_needed:
+                lookup[entity_id] = {
+                    "name": normalize_business_name(row_d.get("business_name")),
+                    "address": normalize_address(row_d.get("business_address")),
+                    "country": normalize_country(row_d.get("country")),
+                }
+    return lookup
 
 
 def iter_candidates(
