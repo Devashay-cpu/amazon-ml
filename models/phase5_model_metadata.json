@@ -1,0 +1,30 @@
+{
+  "model_type": "HistGradientBoostingClassifier (Phase 5)",
+  "feature_columns": [
+    "name_exact_match",
+    "name_suffix_stripped_match",
+    "name_alnum_match",
+    "name_token_sorted_match",
+    "name_prefix4_match",
+    "name_char_similarity",
+    "name_token_jaccard",
+    "name_token_count_diff",
+    "address_exact_match",
+    "address_alnum_match",
+    "address_char_similarity",
+    "house_number_match",
+    "postal_code_match",
+    "unit_token_match",
+    "street_token_jaccard",
+    "country_match"
+  ],
+  "default_threshold": 0.5,
+  "phase5_selected_threshold": 0.9600000000000001,
+  "phase5_selected_threshold_criterion": "max-F1 on validation set",
+  "training_input_file": "D:\\amazon-ml\\student_resource\\features\\train_pair_features.csv",
+  "training_rows_used": 1199128,
+  "seed": 42,
+  "test_size": 0.2,
+  "max_iter": 200,
+  "trained_at": "2026-09-27 20:50:13"
+}

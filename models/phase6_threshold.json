@@ -1,0 +1,16 @@
+{
+  "selected_threshold": 0.11,
+  "selection_criterion": "minimum business cost on validation set",
+  "cost_fp": 1.0,
+  "cost_fn": 10.0,
+  "validation_metrics_at_threshold": {
+    "precision": 0.6395,
+    "recall": 0.9322,
+    "f1": 0.7586,
+    "business_cost": 71.0
+  },
+  "seed": 42,
+  "test_size": 0.2,
+  "input_file": "D:\\amazon-ml\\student_resource\\features\\train_pair_features.csv",
+  "computed_at": "2026-09-27 20:54:01"
+}

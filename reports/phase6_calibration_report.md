@@ -1,6 +1,6 @@
 # Phase 6 Calibration Report
 
-Generated: 2026-09-27 09:11:02
+Generated: 2026-09-27 20:54:01
 
 ## Phase 5 baseline metrics (this run's split)
 
