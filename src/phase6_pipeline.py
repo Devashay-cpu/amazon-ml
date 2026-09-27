@@ -286,6 +286,11 @@ def main() -> None:
                         help="Relaxed RARE_TOKEN_MAX_DOC_CAP to try (default is 4x Phase 2's 50)")
     parser.add_argument("--blocking-dataset", choices=["train", "test"], default="train")
     parser.add_argument("--blocking-sample-size", type=int, default=20_000)
+    parser.add_argument("--no-save-threshold", action="store_true",
+                         help="Phase 7 addition: skip persisting the selected threshold to models/. "
+                              "By default it IS saved, since Phase 7's inference module loads it.")
+    parser.add_argument("--model-dir", type=str, default=None,
+                         help="Phase 7 addition: directory to save the selected threshold into (default: models/).")
     args = parser.parse_args()
 
     project_root = find_project_root()
@@ -389,6 +394,34 @@ def main() -> None:
     )
     report_path = reports_dir / "phase6_calibration_report.md"
     report_path.write_text(report, encoding="utf-8")
+
+    if not args.no_save_threshold:
+        # Phase 7 addition: persist the selected threshold (+ the cost
+        # weights that produced it) so src/inference.py can apply it without
+        # re-running this whole calibration. Purely additive -- no existing
+        # computed value, report content, or file above is changed by this.
+        model_dir = Path(args.model_dir) if args.model_dir else project_root / "models"
+        model_dir.mkdir(exist_ok=True)
+        threshold_path = model_dir / "phase6_threshold.json"
+        threshold_meta = {
+            "selected_threshold": best_cost_row["threshold"],
+            "selection_criterion": "minimum business cost on validation set",
+            "cost_fp": args.cost_fp,
+            "cost_fn": args.cost_fn,
+            "validation_metrics_at_threshold": {
+                "precision": best_cost_row["precision"],
+                "recall": best_cost_row["recall"],
+                "f1": best_cost_row["f1"],
+                "business_cost": best_cost_row["business_cost"],
+            },
+            "seed": args.seed,
+            "test_size": args.test_size,
+            "input_file": str(input_path),
+            "computed_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        with open(threshold_path, "w", encoding="utf-8") as f:
+            json.dump(threshold_meta, f, indent=2)
+        print(f"Threshold saved: {threshold_path}")
 
     print("=" * 70)
     print("PHASE 6 COMPLETE")

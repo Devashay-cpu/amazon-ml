@@ -44,6 +44,8 @@ Writes:
 from __future__ import annotations
 
 import argparse
+import json
+import sys
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -67,6 +69,18 @@ from train_baseline import (
     select_threshold,
 )
 
+# Phase 7 fix: when this file is run directly (`python train_model_v2.py`),
+# Python executes it as module "__main__", not "train_model_v2" -- so a
+# joblib-pickled object referencing one of this module's functions (e.g.
+# FunctionTransformer(_sentinel_to_nan) inside build_gbm_pipeline) would be
+# unloadable from any OTHER script, which imports this file under its real
+# name. Registering this exact, currently-running module object under BOTH
+# names in sys.modules means pickle's identity check
+# (getattr(sys.modules['train_model_v2'], name) is obj) succeeds regardless
+# of which name the script happened to run under. This changes no runtime
+# behavior of the module -- it only fixes cross-script model persistence.
+sys.modules.setdefault("train_model_v2", sys.modules[__name__])
+
 DEFAULT_MAX_ITER = 200  # fixed, sensible default -- NOT tuned/swept (per spec)
 
 
@@ -84,6 +98,17 @@ def _sentinel_to_nan(X: np.ndarray) -> np.ndarray:
     X = X.copy()
     X[X == MISSING] = np.nan
     return X
+
+
+# Phase 7 fix: when this script is executed directly (`python train_model_v2.py`),
+# Python sets this module's __name__/__module__ to "__main__", so a joblib-
+# pickled FunctionTransformer(_sentinel_to_nan) would record its callable's
+# module as "__main__" -- which breaks unpickling from any OTHER script
+# (e.g. src/inference.py), since Python can't find "_sentinel_to_nan" on a
+# fresh "__main__" module there. Explicitly pinning __module__ to this
+# file's real importable name fixes cross-script loading without changing
+# _sentinel_to_nan's behavior at all.
+_sentinel_to_nan.__module__ = "train_model_v2"
 
 
 def build_gbm_pipeline(seed: int, max_iter: int = DEFAULT_MAX_ITER) -> Pipeline:
@@ -149,6 +174,7 @@ def _evaluate_model(name: str, pipeline: Pipeline, X_train, y_train, X_val, y_va
         "default_metrics": default_metrics,
         "selected_threshold": selected_threshold,
         "selected_metrics": selected_metrics,
+        "fitted_pipeline": pipeline,  # Phase 7 addition: needed to persist the trained model for inference
     }
 
 
@@ -160,6 +186,11 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=RANDOM_SEED_DEFAULT)
     parser.add_argument("--max-iter", type=int, default=DEFAULT_MAX_ITER,
                          help="Fixed boosting-round count for the Phase 5 model (not tuned/swept).")
+    parser.add_argument("--no-save-model", action="store_true",
+                         help="Phase 7 addition: skip persisting the fitted Phase 5 pipeline to models/. "
+                              "By default the model IS saved, since Phase 7's inference module loads it.")
+    parser.add_argument("--model-dir", type=str, default=None,
+                         help="Phase 7 addition: directory to save the trained model into (default: models/).")
     args = parser.parse_args()
 
     project_root = find_project_root()
@@ -222,6 +253,39 @@ def main() -> None:
     report_path = reports_dir / "phase5_model_report.md"
     report_path.write_text(report, encoding="utf-8")
     print(f"Report: {report_path}")
+
+    if not args.no_save_model:
+        # Phase 7 addition: persist the already-fitted Phase 5 pipeline so
+        # src/inference.py can load it without retraining. This does not
+        # change any Phase 5 metric, methodology, or report content above --
+        # it saves the exact pipeline object that was already fit and
+        # evaluated. See docs/PHASE7_DESIGN.md for the full contract.
+        import joblib
+
+        model_dir = Path(args.model_dir) if args.model_dir else project_root / "models"
+        model_dir.mkdir(exist_ok=True)
+        model_path = model_dir / "phase5_model.joblib"
+        metadata_path = model_dir / "phase5_model_metadata.json"
+
+        joblib.dump(phase5_result["fitted_pipeline"], model_path)
+        metadata = {
+            "model_type": "HistGradientBoostingClassifier (Phase 5)",
+            "feature_columns": feature_columns,
+            "default_threshold": 0.5,
+            "phase5_selected_threshold": phase5_result["selected_threshold"],
+            "phase5_selected_threshold_criterion": "max-F1 on validation set",
+            "training_input_file": str(input_path),
+            "training_rows_used": stats["n_rows_used"],
+            "seed": args.seed,
+            "test_size": args.test_size,
+            "max_iter": args.max_iter,
+            "trained_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        with open(metadata_path, "w", encoding="utf-8") as f:
+            json.dump(metadata, f, indent=2)
+        print(f"Model saved: {model_path}")
+        print(f"Model metadata saved: {metadata_path}")
+
     print("STOP — Phase 5 only. No deployment/API/ranking, no Phase 6 work.")
 
 

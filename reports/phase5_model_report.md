@@ -1,6 +1,6 @@
 # Phase 5 Model Report
 
-Generated: 2026-09-27 09:03:06
+Generated: 2026-09-27 20:32:44
 
 ## Dataset
 
@@ -38,7 +38,7 @@ Phase 3's `MISSING = -1` sentinel means "this comparison could not be made" and 
 
 ### Phase 4 baseline (LogisticRegression)
 
-Fit time: 10.141s
+Fit time: 9.623s
 
 **At default threshold (0.50):**
 - Accuracy: 0.9943  Precision: 0.0413  Recall: 1.0  F1: 0.0794
@@ -51,7 +51,7 @@ Fit time: 10.141s
 
 ### Phase 5 model (HistGradientBoostingClassifier)
 
-Fit time: 13.155s
+Fit time: 13.071s
 
 **At default threshold (0.50):**
 - Accuracy: 0.9999  Precision: 0.6667  Recall: 0.8814  F1: 0.7591
